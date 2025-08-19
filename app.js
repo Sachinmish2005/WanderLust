@@ -24,8 +24,9 @@ app.use(express.static(path.join(__dirname,"/public")));
 
 app.engine('ejs',ejsMate);
 
-app.get("/",(req,res)=>{
-  res.send("Hi I am root");
+app.get("/",async(req,res)=>{
+  const allListings=await Listing.find({});
+   res.render("listings/index",{allListings});
 });
 //Index Route
 app.get("/listings",async (req,res)=>{
