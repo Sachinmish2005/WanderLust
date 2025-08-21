@@ -5,7 +5,8 @@ const Listing=require("./models/listing.js");
 const path=require("path");
 const methodOverride=require("method-override");
 const ejsMate=require("ejs-mate");
-
+const wrapAsync=require("./utils/wrapAsync.js");
+const ExpressError=require("./utils/ExpressError.js");
 
 
 
@@ -46,12 +47,25 @@ const listing=await Listing.findById(id);
 res.render("listings/show.ejs",{listing});
 });
 
+// //Create Route
+// app.post("/listings",async(req,res,next)=>{
+//   try{
+//  const newListing=new Listing(req.body.listing);
+//  await newListing.save();
+//  res.redirect("/listings");
+// } catch(err){
+//   next(err);
+// }
+// });
+
 //Create Route
-app.post("/listings",async(req,res)=>{
+app.post("/listings",wrapAsync(async(req,res,next)=>{
+
  const newListing=new Listing(req.body.listing);
  await newListing.save();
  res.redirect("/listings");
-});
+
+}));
 
 //Edit Route
 
@@ -70,11 +84,11 @@ app.put("/listings/:id",async(req,res)=>{
 });
 
 //Delete Route
-app.delete("/listings/:id",async(req,res)=>{
+app.delete("/listings/:id",wrapAsync( async(req,res)=>{
   let{id}=req.params;
   await Listing.findByIdAndDelete(id);
   res.redirect("/listings");
-})
+}));
 
 
 
@@ -104,7 +118,11 @@ app.delete("/listings/:id",async(req,res)=>{
 
 
 
+app.use((err,req,res,next)=>{
+  let {statusCode,message}=err;
 
+  res.status(statusCode).send(message);
+});
 
 
 
